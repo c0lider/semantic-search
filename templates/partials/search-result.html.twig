@@ -1,0 +1,16 @@
+{# partials/search-result.html.twig #}
+
+{% if result is defined and result is not null %}
+
+    <div class="col-3 mb-3">
+        <div class="card bg-dark h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ result.name }} (#{{ result.id }})</h5>
+                <h6 class="card-subtitle mb-2 text-body-secondary">{{ result.color }}</h6>
+                <p class="card-text">{{ result.description }}</p>
+                <a href="#" class="card-link">See details</a>
+            </div>
+        </div>
+    </div>
+
+{% endif %}

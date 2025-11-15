@@ -1,0 +1,7 @@
+{# partials/search-result-list.html.twig #}
+
+{% if results is defined and results is not empty %}
+    {% for result in results %}
+        {% include 'partials/search-result.html.twig' with {'result': result} %}
+    {% endfor %}
+{% endif %}
