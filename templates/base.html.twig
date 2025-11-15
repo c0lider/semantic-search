@@ -1,0 +1,33 @@
+{# base.html.twig #}
+
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}
+            {% if document.getTitle() %}
+                {{ document.getTitle() }}
+            {% endif %}
+        {% endblock %}
+    </title>
+
+    <link rel="stylesheet" href="">
+</head>
+
+<body>
+    {# header #}
+    {% include 'partials/header.html.twig' %}
+
+    <main>
+        {% block body %}
+
+        {% endblock %}
+    </main>
+
+    {# footer #}
+    {% include 'partials/footer.html.twig' %}
+</body>
+</html>
