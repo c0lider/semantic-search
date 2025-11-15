@@ -23,11 +23,11 @@
     {{ encore_entry_script_tags('app') }}
 </head>
 
-<body>
+<body class="d-flex flex-column min-vh-100 bg-primary text-white">
     {# header #}
     {% include 'partials/header.html.twig' %}
 
-    <main>
+    <main class="flex-fill">
         {% block body %}
 
         {% endblock %}

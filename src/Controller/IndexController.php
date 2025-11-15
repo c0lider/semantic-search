@@ -8,7 +8,7 @@ use Symfony\Bridge\Twig\Attribute\Template;
 class IndexController extends FrontendController
 {
     #[Template(template: 'documents/index.html.twig')]
-    public function indexAction()
+    public function indexAction(): array
     {
         return [];
     }

@@ -3,5 +3,24 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-Hello World!
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h1>
+                    Willkommen bei der semantischen Suche.
+                </h1>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-12 px-5">
+
+                <form id="search-form" role="search" class="d-flex gap-3">
+                    <input id="search-input" class="form-control me-2 text-black" type="search" aria-label="Search">
+                    <button class="btn btn-primary" type="submit">Suchen</button>
+                </form>
+
+            </div>
+        </div>
+    </div>
 {% endblock %}
