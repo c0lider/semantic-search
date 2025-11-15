@@ -47,3 +47,15 @@ nbproject
 
 # temp
 .temp
+
+# node modules
+/node_modules
+
+# generated files
+/public/build
+
+# Caches
+**/__pycache__/
+
+# MacOS files
+**/.DS_Store
