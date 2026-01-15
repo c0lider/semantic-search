@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+sentence-transformers
+# the argument is necessary since ddev containers are not allowed to use the gpu (this saves time)
+torch --index-url https://download.pytorch.org/whl/cpu

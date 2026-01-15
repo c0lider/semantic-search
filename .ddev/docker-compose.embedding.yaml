@@ -1,0 +1,19 @@
+services:
+    embedding-service:
+        container_name: ddev-${DDEV_SITENAME}-embedding-service
+        build:
+            context: ../embedding-service
+            dockerfile: Dockerfile
+        labels:
+            com.ddev.site-name: ${DDEV_SITENAME}
+            com.ddev.approot: ${DDEV_APPROOT}
+        # makes the service callable inside the ddev network via http://embedding-service:8000
+        expose:
+            -   8000
+        environment:
+            - VIRTUAL_HOST=${DDEV_HOSTNAME}
+            - HTTP_EXPOSE=8000:8000
+        # ensures that changes to the code will reach the container without a restart
+        volumes:
+            - "../embedding-service:/app"
+            - ".:/mnt/ddev_config"

@@ -1,0 +1,16 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# load system requirements for PyTorch/BERT
+RUN apt-get update && apt-get install -y --no-install-recommends && rm -rf /var/lib/apt-lists/*
+
+# install python packages
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# copy code
+COPY . .
+
+# run FastAPI via Uvicorn
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
