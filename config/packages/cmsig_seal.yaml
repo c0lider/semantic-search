@@ -1,0 +1,8 @@
+cmsig_seal:
+    schemas:
+        default:
+            dir: '%kernel.project_dir%/config/schemas'
+            engine: default
+    engines:
+        default:
+            adapter: 'opensearch://opensearch:9200'
