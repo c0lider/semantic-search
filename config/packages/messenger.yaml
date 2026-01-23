@@ -1,0 +1,7 @@
+framework:
+    messenger:
+        transports:
+            async: 'doctrine://default'
+        routing:
+            'App\Message\ProductDeleteMessage': async
+            'App\Message\ProductUpdateMessage': async
