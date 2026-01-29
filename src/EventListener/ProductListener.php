@@ -17,8 +17,9 @@ readonly class ProductListener
     ) {
     }
 
+    #[AsEventListener(event: DataObjectEvents::POST_ADD)]
     #[AsEventListener(event: DataObjectEvents::POST_UPDATE)]
-    public function onProductUpdate(DataObjectEvent $event): void
+    public function onProductUpdateOrCreation(DataObjectEvent $event): void
     {
         $object = $event->getObject();
 
