@@ -2,17 +2,16 @@
 
 namespace App\Controller;
 
-use App\Service\SearchService;
+use App\Service\SearchOrchestrator;
 use Pimcore\Controller\FrontendController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Stopwatch\Stopwatch;
 
 class SearchController extends FrontendController
 {
     public function __construct(
-        private readonly SearchService $searchService
+        private readonly SearchOrchestrator $searchOrchestrator,
     ) {
     }
 
@@ -23,15 +22,17 @@ class SearchController extends FrontendController
             return new JsonResponse(['error' => 'No query provided']);
         }
 
-        $stopWatch = new Stopwatch();
-        $event = $stopWatch->start('search');
-        $results = $this->searchService->search($query);
-        $event->stop();
+        $searchResult = $this->searchOrchestrator->findProductsByQuery($query);
 
         $html = $this->renderView(
             'partials/search-result-list.html.twig',
-            ['results' => $results]);
+            ['results' => $searchResult->products]);
 
-        return new JsonResponse(['html' => $html, 'count' => count($results), 'query' => $query, 'duration' => $event->getDuration()]);
+        return new JsonResponse([
+            'html' => $html,
+            'count' => $searchResult->totalHits,
+            'query' => $query,
+            'duration' => $searchResult->time
+        ]);
     }
 }
