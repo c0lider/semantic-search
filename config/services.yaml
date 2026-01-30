@@ -82,6 +82,15 @@ services:
     App\MessageHandler\:
         resource: '../src/MessageHandler/*'
 
+    # build opensearch client and make it injectable
+    OpenSearch\ClientBuilder:
+        factory: ['OpenSearch\ClientBuilder', 'create']
+        calls:
+            - [setHosts, [['http://opensearch:9200']]] # DDEV internal hostname
+
+    OpenSearch\Client:
+        factory: ['@OpenSearch\ClientBuilder', 'build']
+
     # Example custom templating helper
     # App\Templating\Helper\Example:
     #     # templating helpers need to be public as they
