@@ -13,6 +13,7 @@ readonly class IndexingService
         private EmbeddingProvider $embeddingService,
         private EngineInterface $engine,
         private LoggerInterface $logger,
+        private ProductPropertyResolver $propertyResolver
     ) {
     }
 
@@ -29,13 +30,13 @@ readonly class IndexingService
             'title' => $product->getTitle(),
             'brand' => $product->getBrand(),
             'description' => $product->getDescription(),
-            'tags' => $this->getTagsAsArray($product),
+            'tags' => $this->propertyResolver->getTagsAsArray($product),
             'rating' => $product->getRating(),
             'price' => $product->getPrice(),
             'discountPercentage' => $product->getDiscountPercentage(),
             'stock' => $product->getStock(),
             'warrantyInfo' => $product->getWarrantyInfo(),
-            'reviews' => $this->getReviewsAsArray($product),
+            'reviews' => $this->propertyResolver->getReviewsAsArray($product),
             'embedding' => $embedding,
         ]);
     }
@@ -62,39 +63,12 @@ readonly class IndexingService
             $product->getTitle(),
             $product->getBrand(),
             trim($product->getDescription(), '.'),
-            $this->getTagsString($product),
+            $this->propertyResolver->getTagsString($product),
             $ratingString,
             $product->getPrice(),
             $product->getDiscountPercentage(),
             $product->getStock(),
             $product->getWarrantyInfo()
         );
-    }
-
-    private function getTagsAsArray(Product $product): array
-    {
-        return array_map(
-            fn($tag) => $tag['tag']->getData(),
-            $product->getTags());
-    }
-
-    private function getTagsString(Product $product): string
-    {
-        return implode(', ', $this->getTagsAsArray($product));
-    }
-
-    private function getReviewsAsArray(Product $product): array
-    {
-        $reviewData = [];
-        foreach ($product->getReviews() as $reviewBlock) {
-            $reviewData[] = [
-                'rating' => $reviewBlock['rating']->getData(),
-                'comment' => $reviewBlock['comment']->getData(),
-                'date' => $reviewBlock['date']->getData(),
-                'reviewerName' => $reviewBlock['reviewerName']->getData(),
-            ];
-        }
-
-        return $reviewData;
     }
 }
