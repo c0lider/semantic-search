@@ -23,8 +23,9 @@
     "pimcore/quill-bundle": "*",
     "symfony/amqp-messenger": "^6.2 || ^7.2",
     "symfony/dotenv": "^6.2 || ^7.2",
-    "symfony/http-client": "^8.0",
-    "symfony/runtime": "^6.2",
+    "symfony/form": "^6.4",
+    "symfony/http-client": "^6.4",
+    "symfony/runtime": "^6.4",
     "symfony/webpack-encore-bundle": "^2.3"
   },
   "suggest": {
@@ -55,5 +56,8 @@
       "Pimcore\\Composer::clearCache",
       "Pimcore\\Composer::installAssets"
     ]
+  },
+  "require-dev": {
+    "symfony/phpunit-bridge": "^6.4"
   }
 }
