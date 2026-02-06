@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         colors="true">
+    <php>
+        <env name="APP_ENV" value="test"/>
+        <env name="PIMCORE_TEST" value="1"/>
+        <env name="DATABASE_URL" value="mysql://user:pass@127.0.0.1/pimcore_test"/>
+        <env name="KERNEL_CLASS" value="App\Kernel" />
+        <env name="SYMFONY_DEPRECATIONS_HELPER" value="weak"/>
+    </php>
+    <testsuites>
+        <testsuite name="Project Test Suite">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

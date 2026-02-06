@@ -19,6 +19,7 @@ k-nearest neighbor search in OpenSearch.
     * [Step 5: Configure OpenSearch](#step-5-configure-opensearch)
     * [Step 6: Install the demo data](#step-6-install-the-demo-data)
     * [Step 7: Open the web UI](#step-7-open-the-web-ui)
+  * [Unit tests](#unit-tests)
   * [🌐 Try it out](#-try-it-out)
 <!-- TOC -->
 
@@ -196,6 +197,13 @@ ddev php bin/console product:import
 The pimcore backend is available at http://semantic-search.ddev.site/admin
 
 The search UI is available at http://semantic-search.ddev.site/
+
+## Unit tests
+
+To run the unit tests, execute the following command:
+```bash
+ddev php vendor/bin/simple-phpunit
+```
 
 ## 🌐 Try it out
 

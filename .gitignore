@@ -59,3 +59,6 @@ nbproject
 
 # MacOS files
 **/.DS_Store
+
+# php unit cache
+.phpunit.result.cache
