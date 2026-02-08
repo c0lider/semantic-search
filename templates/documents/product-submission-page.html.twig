@@ -1,0 +1,26 @@
+{# documents/product-submission-page.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="w-50 p-4 mx-auto bg-dark rounded-4" data-bs-theme="dark">
+        <h1 class="text-center">Product Submission</h1>
+        <div class="my-4">
+            Please enter the details of your product below.
+        </div>
+
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {{ form(product_form) }}
+    </div>
+{% endblock %}

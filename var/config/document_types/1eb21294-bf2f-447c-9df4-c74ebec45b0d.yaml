@@ -1,0 +1,14 @@
+pimcore:
+    documents:
+        doc_types:
+            definitions:
+                1eb21294-bf2f-447c-9df4-c74ebec45b0d:
+                    name: 'Product Submission Document'
+                    group: ''
+                    controller: 'App\Controller\ProductController::showSubmitPage'
+                    template: null
+                    type: page
+                    priority: 0
+                    creationDate: 1770549155
+                    modificationDate: 1770563266
+                    staticGeneratorEnabled: false
