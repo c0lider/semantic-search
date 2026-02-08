@@ -1,3 +1,5 @@
+import 'bootstrap';
+
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById('search-form');
 
