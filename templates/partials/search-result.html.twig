@@ -2,15 +2,35 @@
 
 {% if result is defined and result is not null %}
 
-    <div class="col-3 mb-3">
-        <div class="card bg-dark h-100">
-            <div class="card-body">
-                <h5 class="card-title">{{ result.title }} (#{{ result.id }})</h5>
-                <h6 class="card-subtitle mb-2 text-body-secondary">{{ result.brand }}</h6>
-                <p class="card-text">{{ result.description }}</p>
-                <a href="#" class="card-link">See details</a>
+    <li class="list-group-item d-flex align-items-center">
+        <div class="me-auto">
+            <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                <h5 class="fw-bold fs-5">{{ result.title }}</h5>
+                {% if result.brand is not empty %}
+
+                    <span class="badge bg-light text-secondary border small">
+                        {{ result.brand }}
+                    </span>
+
+                {% endif %}
             </div>
+
+            <p class="mb-0 text-muted text-truncate" style="max-width: 1000px;">
+                {{ result.description }}
+            </p>
         </div>
-    </div>
+
+        <div class="">
+            <a href="/product/details/{{ result.id }}"
+               class="btn btn-outline-primary btn-sm btn-detail-trigger text-nowrap"
+               data-product-id="{{ result.id }}"
+               data-bs-toggle="modal"
+               data-bs-target="#resultDetailsModal"
+            >
+                See details
+            </a>
+        </div>
+
+    </li>
 
 {% endif %}

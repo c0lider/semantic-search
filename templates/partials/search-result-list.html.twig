@@ -1,7 +1,11 @@
 {# partials/search-result-list.html.twig #}
 
 {% if results is defined and results is not empty %}
-    {% for result in results %}
-        {% include 'partials/search-result.html.twig' with {'result': result} %}
-    {% endfor %}
+    <ul class="list-group" data-bs-theme="dark">
+
+        {% for result in results %}
+            {% include 'partials/search-result.html.twig' with {'result': result} %}
+        {% endfor %}
+
+    </ul>
 {% endif %}

@@ -36,7 +36,7 @@ readonly class ProductDtoFactory
         return $dtos;
     }
 
-    private function createDto(Product $product): ProductDto
+    public function createDto(Product $product): ProductDto
     {
         return new ProductDto(
             id: $product->getId() ?? -1,

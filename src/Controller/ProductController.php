@@ -3,16 +3,22 @@
 namespace App\Controller;
 
 use App\Form\Type\ProductType;
+use App\Service\ProductDtoFactory;
 use Pimcore\Controller\FrontendController;
-use Pimcore\Model\DataObject\Data\BlockElement;
 use Pimcore\Model\DataObject\Product;
 use Pimcore\Model\DataObject\Service;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
 
 class ProductController extends FrontendController
 {
     private const string PRODUCT_OBJECT_PATH = 'Products';
+
+    public function __construct(
+        private readonly ProductDtoFactory $dtoFactory,
+    ) {
+    }
 
     public function showSubmitPage(Request $request): Response
     {
@@ -45,4 +51,17 @@ class ProductController extends FrontendController
         );
     }
 
+    #[Route('product/details/{id}', name: 'product_details')]
+    public function getDetails(int $id): Response
+    {
+        $product = Product::getById($id);
+
+        if (!$product instanceof Product) {
+            throw $this->createNotFoundException('Product not found');
+        }
+
+        $productDto = $this->dtoFactory->createDto($product);
+
+        return $this->render('partials/result-details-modal.html.twig', ['product' => $productDto]);
+    }
 }
