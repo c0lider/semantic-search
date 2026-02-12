@@ -14,12 +14,12 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:search:setup',
-    description: 'Configure the OpenSearch index template for k-NN search and prepare the index'
+    description: 'Configure the OpenSearch index templates for k-NN search and prepare the indices'
 )]
 class SetupSearchCommand extends Command
 {
-    private const string TEMPLATE_NAME = 'product_knn_template';
-    private const string INDEX_NAME = 'product';
+    private const array INDEX_NAMES = ['product', 'movie'];
+    private const string TEMPLATE_SUFFIX = '_knn_template';
 
     public function __construct(
         private readonly Client $openSearchClient
@@ -42,28 +42,35 @@ class SetupSearchCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $io->title('OpenSearch k-NN index setup');
 
-        try {
-            $this->putProductIndexTemplate($io);
+        foreach (self::INDEX_NAMES as $indexName) {
+            $io->section('Preparing index ' . $indexName);
 
-            if ($input->getOption('force')) {
-                $this->resetIndex($io);
+            try {
+                $this->putIndexTemplate($indexName, $io);
+
+                if ($input->getOption('force')) {
+                    $this->resetIndex($indexName, $io);
+                }
+            } catch (\Throwable $e) {
+                $io->error("Exception during setup: {$e->getMessage()}");
+                return Command::FAILURE;
             }
-        } catch (\Throwable $e) {
-            $io->error("Exception during setup: {$e->getMessage()}");
-            return Command::FAILURE;
         }
 
         $io->success('Setup completed successfully.');
         return Command::SUCCESS;
     }
 
-    private function putProductIndexTemplate(SymfonyStyle $io): void
+    private function putIndexTemplate(string $indexName, SymfonyStyle $io): void
     {
-        $io->section('1. Creating product search index template');
+        $io->section("1. Creating '$indexName' search index template");
+
+        $templateName = $indexName . self::TEMPLATE_SUFFIX;
+
         $params = [
-            'name' => self::TEMPLATE_NAME,
+            'name' => $templateName,
             'body' => [
-                'index_patterns' => [self::INDEX_NAME . '*'],
+                'index_patterns' => [$indexName . '*'],
                 'priority' => 100,
                 'template' => [
                     'settings' => [
@@ -78,10 +85,6 @@ class SetupSearchCommand extends Command
                                     'name' => 'hnsw',
                                     'space_type' => 'cosinesimil',
                                     'engine' => 'faiss',
-                                    'parameters' => [
-                                        'ef_construction' => 128,
-                                        'm' => 16
-                                    ],
                                 ],
                             ],
                         ],
@@ -92,19 +95,19 @@ class SetupSearchCommand extends Command
 
         $this->openSearchClient->indices()->putIndexTemplate($params);
 
-        $io->success('Search index template ' . self::TEMPLATE_NAME . ' created successfully.');
+        $io->success("Search index template '$templateName' created successfully.");
     }
 
-    private function resetIndex(SymfonyStyle $io): void
+    private function resetIndex(string $indexName, SymfonyStyle $io): void
     {
         $io->section('2. Resetting existing index (force)...');
 
-        if ($this->openSearchClient->indices()->exists(['index' => self::INDEX_NAME])) {
-            $this->openSearchClient->indices()->delete(['index' => self::INDEX_NAME]);
-            $io->writeln('Existing index ' . self::INDEX_NAME . ' deleted successfully.');
+        if ($this->openSearchClient->indices()->exists(['index' => $indexName])) {
+            $this->openSearchClient->indices()->delete(['index' => $indexName]);
+            $io->writeln("Existing index $indexName deleted successfully.");
         }
 
         // the new index won't be created manually so that SEAL creates them automatically via dynamic mapping
-        $io->info('Index will be recreated automatically when a document is indexed for the first time.');
+        $io->info("Index '$indexName' will be recreated automatically when a document is indexed for the first time.");
     }
 }

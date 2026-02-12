@@ -5,3 +5,5 @@ framework:
         routing:
             'App\Message\ProductDeleteMessage': async
             'App\Message\ProductUpdateMessage': async
+            'App\Message\MovieDeleteMessage': async
+            'App\Message\MovieUpdateMessage': async

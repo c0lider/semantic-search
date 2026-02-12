@@ -12,7 +12,7 @@ abstract class AbstractImportService
     ) {
     }
 
-    abstract public function import(OutputInterface $output): void;
+    abstract public function import(OutputInterface $output, int $amount): void;
 
     /**
      * @param string $fileName

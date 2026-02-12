@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use Pimcore\Model\DataObject\Data\BlockElement;
 use Pimcore\Model\DataObject\Product;
 use Pimcore\Model\DataObject\Service;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -34,10 +33,14 @@ class ProductImportService extends AbstractImportService
     /**
      * @throws \Exception
      */
-    public function import(OutputInterface $output): void
+    public function import(OutputInterface $output, int $amount): void
     {
         $handle = $this->getFileHandle(self::IMPORT_FILE);
         $rowCount = self::getRowCount($handle);
+
+        if ($amount > 0 && $rowCount > $amount) {
+            $rowCount = $amount;
+        }
 
         $header = fgetcsv($handle);
 
@@ -48,8 +51,9 @@ class ProductImportService extends AbstractImportService
         $progressBar->setFormat('very_verbose');
         $progressBar->start();
 
+        $counter = 0;
         try {
-            while (($row = fgetcsv($handle)) !== false) {
+            while (($row = fgetcsv($handle)) !== false && $counter++ < $rowCount) {
                 $data = array_combine($header, $row);
                 $this->importProduct($data, $productRoot->getId());
 

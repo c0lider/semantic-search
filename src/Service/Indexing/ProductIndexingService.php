@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\Indexing;
 
 use App\Exception\ApiEmbeddingException;
+use App\Service\EmbeddingProvider;
+use App\Service\ProductPropertyResolver;
 use CmsIg\Seal\EngineInterface;
 use Pimcore\Model\DataObject\Product;
-use Psr\Log\LoggerInterface;
 
-readonly class IndexingService
+readonly class ProductIndexingService
 {
     public function __construct(
-        private EmbeddingProvider $embeddingService,
+        private EmbeddingProvider $embeddingProvider,
         private EngineInterface $engine,
-        private LoggerInterface $logger,
         private ProductPropertyResolver $propertyResolver
     ) {
     }
@@ -23,34 +23,12 @@ readonly class IndexingService
     public function indexProduct(Product $product): void
     {
         $productText = $this->getProductText($product);
-        $embedding = $this->embeddingService->vectorizeText($productText);
+        $embedding = $this->embeddingProvider->vectorizeText($productText);
 
         $this->engine->saveDocument('product', [
             'id' => $product->getId(),
-            'title' => $product->getTitle(),
-            'brand' => $product->getBrand(),
-            'description' => $product->getDescription(),
-            'tags' => $this->propertyResolver->getTagsAsArray($product),
-            'rating' => $product->getRating(),
-            'price' => $product->getPrice(),
-            'discountPercentage' => $product->getDiscountPercentage(),
-            'stock' => $product->getStock(),
-            'warrantyInfo' => $product->getWarrantyInfo(),
-            'reviews' => $this->propertyResolver->getReviewsAsArray($product),
             'embedding' => $embedding,
         ]);
-    }
-
-    public function indexAll(): void
-    {
-        $products = (new Product\Listing())->getData();
-        foreach ($products as $product) {
-            try {
-                $this->indexProduct($product);
-            } catch (ApiEmbeddingException $e) {
-                $this->logger->warning("Failed to index product with id {$product->getId()}: {$e->getMessage()}");
-            }
-        }
     }
 
     private function getProductText(Product $product): string

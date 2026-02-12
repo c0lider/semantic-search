@@ -2,6 +2,6 @@
 
 namespace App\Message;
 
-readonly class ProductUpdateMessage extends AbstractProductMessage
+readonly class ProductUpdateMessage extends AbstractObjectMessage
 {
 }

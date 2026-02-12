@@ -10,7 +10,8 @@ class ProductPropertyResolver
     {
         return array_map(
             fn($tag) => $tag['tag']->getData(),
-            $product->getTags());
+            $product->getTags()
+        );
     }
 
     public function getTagsString(Product $product): string

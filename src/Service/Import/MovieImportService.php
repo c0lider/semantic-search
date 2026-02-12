@@ -35,10 +35,14 @@ class MovieImportService extends AbstractImportService
     /**
      * @throws \Exception
      */
-    public function import(OutputInterface $output): void
+    public function import(OutputInterface $output, int $amount): void
     {
         $handle = $this->getFileHandle(self::IMPORT_FILE);
         $rowCount = self::getRowCount($handle);
+
+        if ($amount > 0 && $rowCount > $amount) {
+            $rowCount = $amount;
+        }
 
         $header = fgetcsv($handle);
 
@@ -49,8 +53,10 @@ class MovieImportService extends AbstractImportService
         $progressBar->setFormat('very_verbose');
         $progressBar->start();
 
+        $counter = 0;
+
         try {
-            while (($row = fgetcsv($handle)) !== false) {
+            while (($row = fgetcsv($handle)) !== false && $counter++ < $rowCount) {
                 $data = array_combine($header, $row);
                 $this->importMovie($data, $movieRoot->getId());
 
