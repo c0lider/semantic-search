@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\Import;
 
 use Carbon\Carbon;
 use Pimcore\Model\DataObject\Data\BlockElement;
@@ -10,7 +10,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ProductImportService
+class ProductImportService extends AbstractImportService
 {
     private const string IMPORT_FILE = 'public/import/product_data.csv';
     private const string PRODUCT_OBJECT_PATH = 'Products';
@@ -28,61 +28,53 @@ class ProductImportService
     private const string WARRANTY_INFORMATION_COLUMN = 'warrantyInformation';
     private const string REVIEWS_COLUMN = 'reviews';
 
-    /**
-     * @var string[]
-     */
+    /* @var string[] */
     private array $existingProducts = [];
-
-    public function __construct(
-        private readonly LoggerInterface $logger,
-    ) {
-    }
 
     /**
      * @throws \Exception
      */
     public function import(OutputInterface $output): void
     {
-        if (!file_exists(self::IMPORT_FILE)) {
-            throw new \RuntimeException('Product import file does not exist');
-        }
-
-        $rowCount = self::getRowCount();
-
-        $handle = fopen(self::IMPORT_FILE, 'r');
-        if ($handle === false) {
-            throw new \RuntimeException('Unable to open file');
-        }
+        $handle = $this->getFileHandle(self::IMPORT_FILE);
+        $rowCount = self::getRowCount($handle);
 
         $header = fgetcsv($handle);
 
         $productRoot = Service::createFolderByPath(self::PRODUCT_OBJECT_PATH);
-        $this->existingProducts = $this->getExistingProductTitles($productRoot->getId());
+        $this->existingProducts = $this->getExistingProductKeys($productRoot->getId());
 
         $progressBar = new ProgressBar($output, $rowCount);
         $progressBar->setFormat('very_verbose');
         $progressBar->start();
 
-        while (($row = fgetcsv($handle)) !== false) {
-            $data = array_combine($header, $row);
-            $this->importProduct($data, $productRoot->getId());
+        try {
+            while (($row = fgetcsv($handle)) !== false) {
+                $data = array_combine($header, $row);
+                $this->importProduct($data, $productRoot->getId());
 
-            $progressBar->advance();
+                $progressBar->advance();
 
-            // to free some memory on bigger imports
-            \Pimcore::collectGarbage();
+                // to free some memory on bigger imports
+                \Pimcore::collectGarbage();
+            }
+        } finally {
+            if (is_resource($handle)) {
+                fclose($handle);
+            }
         }
+
         $progressBar->finish();
         $output->writeln('');
     }
 
     /**
-     * Returns an array of already imported product titles
+     * Returns an array of already imported product keys
      *
-     * @param int $parentId The folder to look for products in
+     * @param int $parentId The id of the folder to look for products in
      * @return string[] an array of already imported product titles
      */
-    private function getExistingProductTitles(int $parentId): array
+    private function getExistingProductKeys(int $parentId): array
     {
         $existingProducts = (new Product\Listing())
             ->setCondition('parentId = ?', $parentId)
@@ -104,17 +96,17 @@ class ProductImportService
      */
     private function importProduct(array $data, int $parentId): void
     {
-        $productTitle = Service::getValidKey($data[self::TITLE_COLUMN], 'object');
+        $productKey = Service::getValidKey($data[self::TITLE_COLUMN], 'object');
 
-        if (in_array($productTitle, $this->existingProducts, true)) {
+        if (in_array($productKey, $this->existingProducts, true)) {
             // product does already exist
-            $this->logger->warning("Product '$productTitle' already exists.");
+            $this->logger->warning("Product '$productKey' already exists.");
             return;
         }
 
         $product = new Product();
         $product->setParentId($parentId)
-            ->setKey($productTitle)
+            ->setKey($productKey)
             ->setPublished(true)
             ->setTitle($data[self::TITLE_COLUMN])
             ->setBrand($data[self::BRAND_COLUMN])
@@ -126,21 +118,21 @@ class ProductImportService
             ->setStock($data[self::STOCK_COLUMN])
             ->setWarrantyInfo($data[self::WARRANTY_INFORMATION_COLUMN])
 
-            ->setTags(self::getTagBlock($data[self::TAGS_COLUMN]))
-            ->setReviews(self::getReviewBlock($data[self::REVIEWS_COLUMN]))
+            ->setTags($this->getTagBlock($data[self::TAGS_COLUMN]))
+            ->setReviews($this->getReviewBlock($data[self::REVIEWS_COLUMN]))
             ->save();
 
-        $this->existingProducts[] = $productTitle;
-        $this->logger->info("Product '$productTitle' imported");
+        $this->existingProducts[] = $productKey;
+        $this->logger->info("Product '$productKey' imported");
     }
 
     /**
      * @param string $tagString
-     * @return array<array<string, BlockElement>> A properly structured array ready to be assigned to a pimcore product data object
+     * @return BlockElement[][] A properly structured array ready to be assigned to a pimcore product data object
      */
-    private static function getTagBlock(string $tagString): array
+    private function getTagBlock(string $tagString): array
     {
-        if (empty($tagString)) {
+        if ($tagString === '') {
             return [];
         }
 
@@ -164,7 +156,7 @@ class ProductImportService
      * @param string $reviewString
      * @return array<array<string
      */
-    private static function getReviewBlock(string $reviewString): array
+    private function getReviewBlock(string $reviewString): array
     {
         if (empty($reviewString)) {
             return [];
@@ -199,22 +191,5 @@ class ProductImportService
         }
 
         return $commentBlocks;
-    }
-
-    private static function getRowCount(): int
-    {
-        $handle = fopen(self::IMPORT_FILE, 'r');
-
-        $lineCount = 0;
-
-        while (!feof($handle)) {
-            fgets($handle);
-            $lineCount++;
-        }
-
-        fclose($handle);
-
-        // subtract header and final linebreak
-        return $lineCount - 2;
     }
 }
