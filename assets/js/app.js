@@ -7,21 +7,43 @@ document.addEventListener("DOMContentLoaded", () => {
     form?.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        const searchResultDisplay = document.getElementById('search-results');
+        searchResultDisplay.innerHTML = '<div class="spinner-border text-primary m-auto" role="status">\n </div>';
+
+        const typeCheckBoxes = document.querySelectorAll('.form-check-input:checked');
+
+        const typesSelected = Array.from(typeCheckBoxes).map(input => input.value);
         const query = document.getElementById('search-input').value;
-        const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
-        const data = await response.json();
 
-        if (data.error) {
-            return alert(data.error);
-        }
+        const params = new URLSearchParams();
+        params.append('q', query);
+        typesSelected.forEach(type => params.append('t[]', type));
 
-        if (data.html !== 0) {
-            document.getElementById('search-results').innerHTML = data.html;
+        fetch(`/search?${params.toString()}`)
+            .then(response => response.json())
+            .then(data => {
+                const searchInfo = document.getElementById('search-info');
 
-            const searchInfo = document.getElementById('search-info');
-            searchInfo.toggleAttribute('hidden', false);
-            searchInfo.children[0].textContent = `${data.count} Ergebnisse für "${query}" in ${data.duration}ms`;
-        }
+                if (data.error) {
+                    searchInfo.toggleAttribute('hidden', false);
+                    searchInfo.children[0].textContent = data.error;
+                    searchResultDisplay.innerHTML = '';
+
+
+                    return;
+                }
+
+                if (data.html !== 0) {
+                    searchInfo.toggleAttribute('hidden', false);
+                    searchInfo.children[0].textContent = `${data.totalCount} results for '${query}' in ${data.totalDuration}ms`;
+
+                    searchResultDisplay.innerHTML = '';
+
+                    for (const result of data.results) {
+                        searchResultDisplay.insertAdjacentHTML('beforeend', result.html);
+                    }
+                }
+            })
     });
 
     // open search result details modal

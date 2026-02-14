@@ -10,46 +10,48 @@ use Symfony\Component\Stopwatch\Stopwatch;
 
 readonly class SearchOrchestrator
 {
-    private const string INDEX_NAME = 'product';
     private const int K = 10;
 
     public function __construct(
         private EmbeddingProvider $embeddingProvider,
         private LoggerInterface $logger,
         private Client $openSearchClient,
-        private ProductDtoFactory $dtoFactory,
-        private ProductHydrator $hydrator,
+        private SearchProcessorLocator $processorLocator,
     ) {
     }
 
     /**
      * @param string $query
+     * @param string $indexName
      * @return SearchResult
      */
-    public function findProductsByQuery(string $query): SearchResult
+    public function findObjectsByQuery(string $query, string $indexName): SearchResult
     {
-        $stopWatch = new Stopwatch();
-        $event = $stopWatch->start('search');
+        try{
+            $processor = $this->processorLocator->getProcessor($indexName);
+        } catch (\InvalidArgumentException $e) {
+            $this->logger->warning($e);
 
-        $productIds = $this->findProductIdsByQuery($query);
+            return new SearchResult([], 0, 0);
+        }
+
+        $stopWatch = new Stopwatch();
+
+        $event = $stopWatch->start('search');
+        $objectIds = $this->findObjectIdsByQuery($query, $indexName);
         $event->stop();
 
-        $products = $this->hydrator->hydrateProductIds($productIds);
-        $dtos = $this->dtoFactory->transformToDtos($products);
+        $dtos = $processor->process($objectIds);
 
-        return new SearchResult(
-            products: $dtos,
-            totalHits: count($dtos),
-            time: $event->getDuration()
-        );
+        return new SearchResult($dtos, count($dtos), $event->getDuration());
     }
 
-    public function findProductIdsByQuery(string $query): array
+    public function findObjectIdsByQuery(string $query, string $indexName): array
     {
         // TODO paging, limit, offset, filter by categories etc
         try {
             $queryVector = $this->embeddingProvider->vectorizeText($query);
-            $response = $this->executeOpensearchKnn($queryVector);
+            $response = $this->executeOpensearchKnn($queryVector, $indexName);
 
             return $this->extractIdsFromResponse($response);
         } catch (ApiEmbeddingException $e) {
@@ -61,10 +63,10 @@ readonly class SearchOrchestrator
         return [];
     }
 
-    private function executeOpensearchKnn(array $queryVector): array
+    private function executeOpensearchKnn(array $queryVector, string $indexName): array
     {
         $searchParams = [
-            'index' => self::INDEX_NAME,
+            'index' => $indexName,
             'body' => [
                 'size' => self::K,
                 '_source' => ['id'],

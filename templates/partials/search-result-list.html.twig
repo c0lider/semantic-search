@@ -1,10 +1,16 @@
 {# partials/search-result-list.html.twig #}
 
 {% if results is defined and results is not empty %}
-    <ul class="list-group" data-bs-theme="dark">
+    <div class="row mb-3">
+        <div class="col-12">
+            Found {{ results.totalHits }} results of type '{{ type }}' in {{ results.time }} ms.
+        </div>
+    </div>
 
-        {% for result in results %}
-            {% include 'partials/search-result.html.twig' with {'result': result} %}
+    <ul class="list-group mb-5" data-bs-theme="dark">
+
+        {% for dto in results.dtos %}
+            {% include 'partials/search-result.html.twig' with {'dto': dto} %}
         {% endfor %}
 
     </ul>

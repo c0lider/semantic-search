@@ -2,13 +2,13 @@
 
 namespace App\Model;
 
-use App\Dto\ProductDto;
+use App\Dto\SearchResultDto;
 
 readonly class SearchResult
 {
     public function __construct(
-        /** @var ProductDto[] */
-        public array $products,
+        /** @var SearchResultDto[] */
+        public array $dtos,
         public int $totalHits,
         public float $time
     ) {

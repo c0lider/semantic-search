@@ -10,6 +10,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class SearchController extends FrontendController
 {
+    private const array KNOWN_INDICES = ['product', 'movie'];
     public function __construct(
         private readonly SearchOrchestrator $searchOrchestrator,
     ) {
@@ -18,21 +19,45 @@ class SearchController extends FrontendController
     #[Route('/search', name: 'app_search', methods: ['GET'])]
     public function search(Request $request): JsonResponse {
         $query = $request->query->get('q');
+        $objectTypes = $request->query->all('t');
+
         if (!$query) {
             return new JsonResponse(['error' => 'No query provided']);
         }
 
-        $searchResult = $this->searchOrchestrator->findProductsByQuery($query);
+        if (empty($objectTypes)) {
+            $objectTypes = self::KNOWN_INDICES;
+        }
 
-        $html = $this->renderView(
-            'partials/search-result-list.html.twig',
-            ['results' => $searchResult->products]);
+        $results = [];
+        $totalDuration = 0;
+        $totalCount = 0;
+
+        foreach ($objectTypes as $type) {
+            $searchResult = $this->searchOrchestrator->findObjectsByQuery($query, $type);
+            $html = $this->renderView(
+                'partials/search-result-list.html.twig',
+                [
+                    'results' => $searchResult,
+                    'type' => $type
+                ]);
+
+            $results[] = [
+                'type' => $type,
+                'html' => $html,
+                'count' => $searchResult->totalHits,
+                'duration' => $searchResult->time
+            ];
+
+            $totalCount += $searchResult->totalHits;
+            $totalDuration += $searchResult->time;
+        }
 
         return new JsonResponse([
-            'html' => $html,
-            'count' => $searchResult->totalHits,
             'query' => $query,
-            'duration' => $searchResult->time
+            'results' => $results,
+            'totalDuration' => $totalDuration,
+            'totalCount' => $totalCount
         ]);
     }
 }

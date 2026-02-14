@@ -1,29 +1,29 @@
 {# partials/search-result.html.twig #}
 
-{% if result is defined and result is not null %}
+{% if dto is defined and dto is not null %}
 
     <li class="list-group-item d-flex align-items-center">
         <div class="me-auto">
             <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
-                <h5 class="fw-bold fs-5">{{ result.title }}</h5>
-                {% if result.brand is not empty %}
+                <h5 class="fw-bold fs-5">{{ dto.title }}</h5>
+                {% if dto.tag is not empty %}
 
                     <span class="badge bg-light text-secondary border small">
-                        {{ result.brand }}
+                        {{ dto.tag }}
                     </span>
 
                 {% endif %}
             </div>
 
             <p class="mb-0 text-muted text-truncate" style="max-width: 1000px;">
-                {{ result.description }}
+                {{ dto.descriptionText }}
             </p>
         </div>
 
         <div class="">
-            <a href="/product/details/{{ result.id }}"
+            <a href="/product/details/{{ dto.id }}"
                class="btn btn-outline-primary btn-sm btn-detail-trigger text-nowrap"
-               data-product-id="{{ result.id }}"
+               data-product-id="{{ dto.id }}"
                data-bs-toggle="modal"
                data-bs-target="#resultDetailsModal"
             >

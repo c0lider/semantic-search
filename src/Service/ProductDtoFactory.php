@@ -2,54 +2,39 @@
 
 namespace App\Service;
 
-use App\Dto\ProductDto;
+use App\Dto\SearchResultDto;
 use Pimcore\Model\DataObject\Product;
 use Psr\Log\LoggerInterface;
 
-readonly class ProductDtoFactory
+readonly class ProductDtoFactory extends AbstractDtoFactory
 {
     public function __construct(
-        private LoggerInterface $logger,
+        LoggerInterface $logger,
         private ProductPropertyResolver $propertyResolver
     ) {
+        parent::__construct($logger, Product::class);
     }
 
     /**
-     * @param Product[] $products
-     * @return ProductDto[]
+     * @param Product $object
+     * @return SearchResultDto
      */
-    public function transformToDtos(array $products): array
+    public function createDto(object $object): SearchResultDto
     {
-        $dtos = [];
-
-        foreach ($products as $product) {
-            if (!$product instanceof Product) {
-                $this->logger->warning(
-                    'Could not create product dto, since the provided object is not a product.',
-                    ['object' => $product]
-                );
-                continue;
-            }
-            $dtos[] = $this->createDto($product);
-        }
-
-        return $dtos;
-    }
-
-    public function createDto(Product $product): ProductDto
-    {
-        return new ProductDto(
-            id: $product->getId() ?? -1,
-            title: $product->getTitle() ?? '',
-            brand: $product->getBrand() ?? '',
-            description: $product->getDescription() ?? '',
-            tags: $this->propertyResolver->getTagsAsArray($product),
-            rating: $product->getRating() ?? -1,
-            price: $product->getPrice() ?? -1,
-            discountPercentage: $product->getDiscountPercentage() ?? -1,
-            stock: $product->getStock() ?? -1,
-            warrantyInfo: $product->getWarrantyInfo() ?? '',
-            reviews: $this->propertyResolver->getReviewsAsArray($product)
+        return new SearchResultDto(
+            id: $object->getId() ?? -1,
+            title: $object->getTitle() ?? '',
+            tag: $object->getBrand() ?? '',
+            descriptionText: $object->getDescription() ?? '',
+            metaData: [
+                'tags' => $this->propertyResolver->getTagsAsArray($object),
+                'rating' => $object->getRating() ?? -1,
+                'price' => $object->getPrice() ?? -1,
+                'discountPercentage' => $object->getDiscountPercentage() ?? -1,
+                'stock' => $object->getStock() ?? -1,
+                'warrantyInfo' => $object->getWarrantyInfo() ?? '',
+                'reviews' => $this->propertyResolver->getReviewsAsArray($object)
+            ]
         );
     }
 }
