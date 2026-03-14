@@ -10,7 +10,7 @@ class EmbeddingProvider
 {
     private const int DEFAULT_BATCH_SIZE = 32;
 
-    private const string API_URL = 'http://semantic-search.ddev.site:8000/';
+    private const string API_URL = 'http://embedding-service:8000/';
     private const string EMBEDDING_ENDPOINT = 'embed';
     private const string POST_ARG = 'POST';
 
@@ -55,7 +55,7 @@ class EmbeddingProvider
         } catch (\Throwable $t) {
             $this->logger->error($t->getMessage());
             throw new ApiEmbeddingException(
-                "An exception occurred during batch embedding: {$t->getMessage()}",
+                "An exception occurred during text embedding: {$t->getMessage()}",
                 previous: $t
             );
         }
