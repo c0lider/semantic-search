@@ -11,6 +11,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ProductImportService extends AbstractImportService
 {
+    protected ?string $serviceId = 'products';
     private const string IMPORT_FILE = 'public/import/product_data.csv';
     private const string PRODUCT_OBJECT_PATH = 'Products';
 

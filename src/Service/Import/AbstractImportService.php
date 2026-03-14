@@ -7,9 +7,16 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 abstract class AbstractImportService
 {
+    protected ?string $serviceId = null;
+    
     public function __construct(
         protected readonly LoggerInterface $logger,
     ) {
+    }
+
+    public function getServiceId(): string
+    {
+        return $this->serviceId;
     }
 
     abstract public function import(OutputInterface $output, int $amount): void;

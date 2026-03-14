@@ -11,6 +11,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class MovieImportService extends AbstractImportService
 {
+    protected ?string $serviceId = 'movies';
     private const string IMPORT_FILE = 'public/import/movie_data.csv';
     private const string PRODUCT_OBJECT_PATH = 'Movies';
 
