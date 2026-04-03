@@ -8,7 +8,7 @@ use OpenSearch\Client;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
 
-readonly class SearchOrchestrator
+readonly class SemanticSearchOrchestrator implements SearchOrchestratorInterface
 {
     private const int K = 10;
 
@@ -46,7 +46,7 @@ readonly class SearchOrchestrator
         return new SearchResult($dtos, count($dtos), $event->getDuration());
     }
 
-    public function findObjectIdsByQuery(string $query, string $indexName): array
+    private function findObjectIdsByQuery(string $query, string $indexName): array
     {
         // TODO paging, limit, offset, filter by categories etc
         try {

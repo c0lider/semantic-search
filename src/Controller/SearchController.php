@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Service\SearchOrchestrator;
+use App\Service\SemanticSearchOrchestrator;
 use Pimcore\Controller\FrontendController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -12,7 +12,7 @@ class SearchController extends FrontendController
 {
     private const array KNOWN_INDICES = ['product', 'movie'];
     public function __construct(
-        private readonly SearchOrchestrator $searchOrchestrator,
+        private readonly SemanticSearchOrchestrator $searchOrchestrator,
     ) {
     }
 
