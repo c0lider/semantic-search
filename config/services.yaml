@@ -72,12 +72,11 @@ services:
 
     App\Controller\SearchController:
         arguments:
-            $searchOrchestrator: '@App\Service\SemanticSearchOrchestrator'
+            $searchOrchestrator: '@App\Service\LexicalSearchOrchestrator'
 
     App\Service\SearchEvaluator:
         arguments:
-            $searchOrchestrator: '@App\Service\SemanticSearchOrchestrator'
-
+            $searchOrchestrator: '@App\Service\LexicalSearchOrchestrator'
     #
     # EVENT LISTENER
     #
