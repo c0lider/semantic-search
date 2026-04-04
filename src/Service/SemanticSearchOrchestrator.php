@@ -35,25 +35,27 @@ readonly class SemanticSearchOrchestrator implements SearchOrchestratorInterface
             return new SearchResult([], 0, 0);
         }
 
-        $stopWatch = new Stopwatch();
+        $stopWatch = new Stopwatch(true);
 
         $event = $stopWatch->start('search');
-        $objectIds = $this->findObjectIdsByQuery($query, $indexName);
+        $response = $this->executeSemanticSearch($query, $indexName);
+
         $event->stop();
 
-        $dtos = $processor->process($objectIds);
+        $dtos = [];
+        if (!empty($response)) {
+            $objectIds = $this->extractIdsFromResponse($response);
+            $dtos = $processor->process($objectIds);
+        }
 
         return new SearchResult($dtos, count($dtos), $event->getDuration());
     }
 
-    private function findObjectIdsByQuery(string $query, string $indexName): array
+    private function executeSemanticSearch(string $query, string $indexName): array
     {
-        // TODO paging, limit, offset, filter by categories etc
         try {
             $queryVector = $this->embeddingProvider->vectorizeText($query);
-            $response = $this->executeOpensearchKnn($queryVector, $indexName);
-
-            return $this->extractIdsFromResponse($response);
+            return $this->executeOpensearchKnn($queryVector, $indexName);
         } catch (ApiEmbeddingException $e) {
             $this->logger->warning("Failed to vectorize query: '$query'. Exception: {$e->getMessage()}");
         } catch (\Throwable $e) {

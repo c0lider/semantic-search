@@ -58,6 +58,7 @@ services:
     App\Command\:
         resource: '../src/Command/*'
         tags: [ 'console.command' ]
+
     #
     # SERVICES
     #
@@ -68,6 +69,10 @@ services:
         exclude:
             - '../src/Service/AbstractDtoFactory.php'
             - '../src/Service/AbstractTypeProcessor.php'
+
+    App\Service\SearchEvaluator:
+        arguments:
+            $searchOrchestrator: '@App\Service\SemanticSearchOrchestrator'
 
     #
     # EVENT LISTENER
