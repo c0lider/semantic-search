@@ -137,6 +137,19 @@ class SearchEvaluator
         $this->writeResultsToCsv($results);
     }
 
+    public function evaluateSemanticSearchInDetail(): void
+    {
+        echo "Suchbegriff\tVektorisierungsdauer [ms]\tSuchdauer[ms]\tHydrierungsdauer [ms]" . PHP_EOL;
+
+        foreach ($this->productQueries as $query) {
+            $this->searchOrchestrator->findObjectsByQuery($query, 'product');
+        }
+
+        foreach ($this->movieQueries as $query) {
+            $this->searchOrchestrator->findObjectsByQuery($query, 'movie');
+        }
+    }
+
     private function writeResultsToCsv(array $results): void
     {
         $filePath = 'latency_results.csv';

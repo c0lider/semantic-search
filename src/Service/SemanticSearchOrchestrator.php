@@ -27,6 +27,8 @@ readonly class SemanticSearchOrchestrator implements SearchOrchestratorInterface
      */
     public function findObjectsByQuery(string $query, string $indexName): SearchResult
     {
+        echo $query;
+
         try{
             $processor = $this->processorLocator->getProcessor($indexName);
         } catch (\InvalidArgumentException $e) {
@@ -35,12 +37,10 @@ readonly class SemanticSearchOrchestrator implements SearchOrchestratorInterface
             return new SearchResult([], 0, 0);
         }
 
-        $stopWatch = new Stopwatch(true);
-
-        $event = $stopWatch->start('search');
         $response = $this->executeSemanticSearch($query, $indexName);
 
-        $event->stop();
+        $stopWatch = new Stopwatch(true);
+        $postProcessingEvent = $stopWatch->start('post-processing');
 
         $dtos = [];
         if (!empty($response)) {
@@ -48,14 +48,31 @@ readonly class SemanticSearchOrchestrator implements SearchOrchestratorInterface
             $dtos = $processor->process($objectIds);
         }
 
-        return new SearchResult($dtos, count($dtos), $event->getDuration());
+        $postProcessingEvent->stop();
+
+        echo "\t" . $postProcessingEvent->getDuration() . PHP_EOL;
+
+        return new SearchResult($dtos, count($dtos), 0);
     }
 
     private function executeSemanticSearch(string $query, string $indexName): array
     {
         try {
+            $stopWatch = new StopWatch(true);
+
+            $vectorizationEvent = $stopWatch->start('vectorization');
             $queryVector = $this->embeddingProvider->vectorizeText($query);
-            return $this->executeOpensearchKnn($queryVector, $indexName);
+            $vectorizationEvent->stop();
+
+            echo "\t" . $vectorizationEvent->getDuration();
+
+            $searchEvent = $stopWatch->start('search');
+            $searchResult = $this->executeOpensearchKnn($queryVector, $indexName);
+            $searchEvent->stop();
+
+            echo "\t" . $searchEvent->getDuration();
+
+            return $searchResult;
         } catch (ApiEmbeddingException $e) {
             $this->logger->warning("Failed to vectorize query: '$query'. Exception: {$e->getMessage()}");
         } catch (\Throwable $e) {
