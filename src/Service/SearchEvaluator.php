@@ -2,6 +2,11 @@
 
 namespace App\Service;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\Pool;
+use GuzzleHttp\Psr7\Request;
+use Symfony\Component\Stopwatch\Stopwatch;
+
 class SearchEvaluator
 {
     private array $productQueries = [
@@ -135,6 +140,49 @@ class SearchEvaluator
         }
 
         $this->writeResultsToCsv($results);
+    }
+
+    public function stressTest(): void
+    {
+        $client = new Client();
+
+        $requests = function ($total) {
+            for ($i = 0; $i < $total; $i++) {
+                yield new Request('GET', 'http://semantic-search.ddev.site//search?q=' . $this->getRandomString());
+            }
+        };
+
+        $stopwatch = new Stopwatch();
+
+        for ($i = 1; $i <= 100; $i++) {
+            echo "Sending {$i} requests simultaneously and waiting for results";
+
+            $event = $stopwatch->start("{$i}_parallel");
+
+            $pool = new Pool($client, $requests($i), [
+                'concurrency' => $i,
+                'rejected' => function ($reason) {
+                    echo "reason: {$reason->getMessage()}\n";
+                }
+            ]);
+            $promise = $pool->promise();
+            $promise->wait();
+
+            $event->stop();
+            echo " took {$event->getDuration()}ms" . PHP_EOL;
+        }
+    }
+
+    private function getRandomString(int $length = 10): string
+    {
+        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+        $resultString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $resultString .= $chars[random_int(0, strlen($chars) - 1)];
+        }
+
+        return $resultString;
     }
 
     private function writeResultsToCsv(array $results): void
