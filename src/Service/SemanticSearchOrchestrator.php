@@ -10,7 +10,7 @@ use Symfony\Component\Stopwatch\Stopwatch;
 
 readonly class SemanticSearchOrchestrator implements SearchOrchestratorInterface
 {
-    private const int K = 10;
+    private const float MIN_SCORE = 0.6;
 
     public function __construct(
         private EmbeddingProvider $embeddingProvider,
@@ -70,13 +70,12 @@ readonly class SemanticSearchOrchestrator implements SearchOrchestratorInterface
         $searchParams = [
             'index' => $indexName,
             'body' => [
-                'size' => self::K,
                 '_source' => ['id'],
                 'query' => [
                     'knn' => [
                         'embedding' => [
                             'vector' => $queryVector,
-                            'k' => self::K
+                            'min_score' => self::MIN_SCORE,
                         ]
                     ]
                 ]
