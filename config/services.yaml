@@ -70,6 +70,10 @@ services:
             - '../src/Service/AbstractDtoFactory.php'
             - '../src/Service/AbstractTypeProcessor.php'
 
+    App\Controller\SearchController:
+        arguments:
+            $searchOrchestrator: '@App\Service\SemanticSearchOrchestrator'
+
     App\Service\SearchEvaluator:
         arguments:
             $searchOrchestrator: '@App\Service\SemanticSearchOrchestrator'
