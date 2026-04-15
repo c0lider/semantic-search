@@ -156,7 +156,7 @@ product key. Paste that key into the terminal and press enter.
 > ```
 > Warning: file_put_contents(/var/www/html/var/tmp/installer_product_registration_tmp_storage.yaml): Failed to open stream: No such file or directory
 > ```
-> please run the following commands:
+> Please run the following commands and run the pimcore installer again. You will need to register for a license again.
 > ```bash
 > ddev exec mkdir -p var/tmp
 > ddev exec chmod -R 775 var
@@ -187,9 +187,10 @@ ddev php bin/console app:search:setup
 
 ### Step 6: Install the demo data
 
-Import the sample product data by running the following command:
+Import the sample product data by running the following commands:
 ```bash
-ddev php bin/console product:import
+ddev php bin/console data:import movies
+ddev php bin/console data:import products
 ```
 
 ### Step 7: Open the web UI
